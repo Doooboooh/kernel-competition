@@ -22,15 +22,22 @@
       "rank": 3
     },
     {
+      "github": "eoe",
+      "score": 89.1,
+      "submitTime": "2026-02-28T12:03:59.528Z",
+      "commitHash": "ghifwa4",
+      "rank": 4
+    },
+    {
       "github": "bob",
       "score": 88.3,
       "submitTime": "2026-02-28T11:49:24.747Z",
       "commitHash": "def5678",
-      "rank": 4
+      "rank": 5
     }
   ],
   "stats": {
-    "participantCount": 4,
-    "submissionCount": 4
+    "participantCount": 5,
+    "submissionCount": 5
   }
 }

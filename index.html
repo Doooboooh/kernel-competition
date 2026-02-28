@@ -334,45 +334,61 @@
   </section>
 
   <script>
-    // ---------- 原封不动的逻辑 (API 调用、分页、搜索、FAQ) ----------
-    const API_BASE_URL = 'https://api.mybigproject.xyz';
+
     let currentPage = 1;
     const pageSize = 10;
     let allEntries = [];
     let filteredEntries = [];
     let searchKeyword = '';
+    let cachedData = null;  // 缓存数据，避免重复请求
 
-    async function loadStats() {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/stats`);
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById('participantCount').textContent = data.data.participantCount || 0;
-          document.getElementById('submissionCount').textContent = data.data.submissionCount || 0;
-        }
-      } catch (e) { console.error('加载统计数据失败:', e); }
+    async function loadData() {
+  if (cachedData) return cachedData;
+  try {
+    const res = await fetch('./data.json');
+    cachedData = await res.json();
+    return cachedData;
+  } catch (e) {
+    console.error('加载 data.json 失败:', e);
+    return null;
+  }
+}
+
+async function loadStats() {
+  try {
+    const data = await loadData();
+    if (data && data.stats) {
+      document.getElementById('participantCount').textContent = data.stats.participantCount || 0;
+      document.getElementById('submissionCount').textContent = data.stats.submissionCount || 0;
     }
+  } catch (e) {
+    console.error('加载统计数据失败:', e);
+  }
+}
+
     
-    async function loadLeaderboard() {
-      const container = document.getElementById('leaderboardBody');
-      container.innerHTML = '<div class="p-8 text-center text-gray-400">加载中...</div>';
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/leaderboard`);
-        const data = await res.json();
-        if (data.success && data.data.length > 0) {
-          allEntries = data.data;
-          filteredEntries = allEntries;
-          currentPage = 1;
-          renderLeaderboard();
-        } else {
-          container.innerHTML = '<div class="p-8 text-center text-gray-400">暂无数据</div>';
-          document.getElementById('pagination').style.display = 'none';
-        }
-      } catch (e) {
-        container.innerHTML = '<div class="p-8 text-center text-red-400">加载失败，请稍后重试</div>';
-        console.error('加载排行榜失败:', e);
-      }
+async function loadLeaderboard() {
+  const container = document.getElementById('leaderboardBody');
+  container.innerHTML = '<div class="p-8 text-center text-gray-400">加载中...</div>';
+  try {
+    const data = await loadData();
+    if (data && data.entries && data.entries.length > 0) {
+      // 按 rank 排序（如果有的话），或按 score 降序
+      allEntries = data.entries.sort((a, b) => (a.rank || 0) - (b.rank || 0) || b.score - a.score);
+      filteredEntries = allEntries;
+      currentPage = 1;
+      renderLeaderboard();
+    } else {
+      container.innerHTML = '<div class="p-8 text-center text-gray-400">暂无数据</div>';
+      document.getElementById('pagination').style.display = 'none';
     }
+  } catch (e) {
+    container.innerHTML = '<div class="p-8 text-center text-red-400">加载失败，请稍后重试</div>';
+    console.error('加载排行榜失败:', e);
+  }
+}
+
+
 
     function renderLeaderboard() {
       const container = document.getElementById('leaderboardBody');

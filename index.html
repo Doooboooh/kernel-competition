@@ -1,1099 +1,463 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>竞赛排行榜</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-            min-height: 100vh;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        /* 导航栏 */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2d3748;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: #718096;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            cursor: pointer;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: #3182ce;
-        }
-
-        /* Hero 区域 */
-        .hero {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: linear-gradient(180deg, rgba(49, 130, 206, 0.08) 0%, transparent 100%);
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #3182ce, #2c5282);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            color: #718096;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-        }
-
-        .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #3182ce;
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: #a0aec0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* 通用容器 */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* 区块样式 */
-        .section {
-            padding: 4rem 0;
-        }
-
-        .section-title {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 3rem;
-            color: #2d3748;
-        }
-
-        .section-title span {
-            color: #3182ce;
-        }
-
-        /* 时间线 - 单侧显示 */
-        .timeline {
-            position: relative;
-            max-width: 700px;
-            margin: 0 auto;
-            padding-left: 40px;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 0;
-            width: 3px;
-            height: 100%;
-            background: linear-gradient(180deg, #3182ce, #63b3ed);
-            border-radius: 3px;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
-            padding-left: 30px;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -32px;
-            top: 8px;
-            width: 16px;
-            height: 16px;
-            background: #fff;
-            border: 3px solid #3182ce;
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        .timeline-item.completed::before {
-            background: #3182ce;
-        }
-
-        .timeline-item.active::before {
-            background: #fff;
-            border-color: #ed8936;
-            box-shadow: 0 0 0 4px rgba(237, 137, 54, 0.2);
-            animation: pulse-ring 2s infinite;
-        }
-
-        @keyframes pulse-ring {
-            0%, 100% { box-shadow: 0 0 0 4px rgba(237, 137, 54, 0.2); }
-            50% { box-shadow: 0 0 0 8px rgba(237, 137, 54, 0.1); }
-        }
-
-        .timeline-content {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .timeline-content:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        }
-
-        .timeline-date {
-            font-size: 0.875rem;
-            color: #3182ce;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-desc {
-            font-size: 0.875rem;
-            color: #718096;
-        }
-
-        .timeline-status {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 0.75rem;
-        }
-
-        .status-completed {
-            background: #c6f6d5;
-            color: #276749;
-        }
-
-        .status-active {
-            background: #feebc8;
-            color: #c05621;
-        }
-
-        .status-upcoming {
-            background: #e2e8f0;
-            color: #718096;
-        }
-
-        /* 奖励卡片 */
-        .prizes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .prize-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .prize-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .prize-card.gold {
-            border-color: #f6e05e;
-            background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);
-        }
-
-        .prize-card.silver {
-            border-color: #cbd5e0;
-            background: linear-gradient(135deg, #f7fafc 0%, #fff 100%);
-        }
-
-        .prize-card.bronze {
-            border-color: #ed8936;
-            background: linear-gradient(135deg, #fffaf0 0%, #fff 100%);
-        }
-
-        .prize-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .prize-rank {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-
-        .prize-amount {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-
-        .prize-card.gold .prize-amount { color: #d69e2e; }
-        .prize-card.silver .prize-amount { color: #718096; }
-        .prize-card.bronze .prize-amount { color: #c05621; }
-
-        .prize-benefits {
-            list-style: none;
-            text-align: left;
-        }
-
-        .prize-benefits li {
-            padding: 0.5rem 0;
-            color: #718096;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .prize-benefits li::before {
-            content: '✓';
-            color: #38a169;
-            font-weight: bold;
-        }
-
-        /* 规则区域 */
-        .rules-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-        }
-        @media (max-width: 768px) {
-            .rules-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .rule-card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .rule-card h3 {
-            font-size: 1.125rem;
-            color: #3182ce;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .rule-card ul {
-            list-style: none;
-        }
-
-        .rule-card li {
-            padding: 0.5rem 0;
-            color: #4a5568;
-            font-size: 0.9rem;
-            padding-left: 1.5rem;
-            position: relative;
-        }
-
-        .rule-card li::before {
-            content: '•';
-            color: #3182ce;
-            position: absolute;
-            left: 0;
-            font-weight: bold;
-        }
-
-        /* 排行榜 */
-        .leaderboard-section {
-            background: #fff;
-            padding: 4rem 0;
-            border-top: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .leaderboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .refresh-btn {
-            background: #ebf8ff;
-            border: 1px solid #3182ce;
-            color: #3182ce;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-        }
-
-        .refresh-btn:hover {
-            background: #3182ce;
-            color: #fff;
-        }
-
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .leaderboard-table th {
-            background: #f7fafc;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #3182ce;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .leaderboard-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #edf2f7;
-        }
-
-        .leaderboard-table tr:hover {
-            background: #f7fafc;
-        }
-
-        .leaderboard-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .rank-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.875rem;
-        }
-
-        .rank-1 { background: linear-gradient(135deg, #f6e05e, #ecc94b); color: #744210; }
-        .rank-2 { background: linear-gradient(135deg, #e2e8f0, #cbd5e0); color: #2d3748; }
-        .rank-3 { background: linear-gradient(135deg, #fbd38d, #ed8936); color: #744210; }
-        .rank-other { background: #edf2f7; color: #718096; }
-
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .player-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3182ce, #2c5282);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .player-name {
-            font-weight: 500;
-            color: #2d3748;
-        }
-
-        .score-value {
-            font-weight: 700;
-            color: #3182ce;
-            font-size: 1.125rem;
-        }
-
-        .commit-link {
-            color: #718096;
-            text-decoration: none;
-            font-family: monospace;
-            font-size: 0.875rem;
-            background: #edf2f7;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .commit-link:hover {
-            color: #3182ce;
-            background: #ebf8ff;
-        }
-
-        .time-value {
-            color: #a0aec0;
-            font-size: 0.875rem;
-        }
-
-        /* FAQ 区域 */
-        .faq-list {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .faq-item {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .faq-question {
-            padding: 1.25rem 1.5rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            color: #2d3748;
-            transition: background 0.3s;
-        }
-
-        .faq-question:hover {
-            background: #f7fafc;
-        }
-
-        .faq-icon {
-            transition: transform 0.3s;
-            color: #3182ce;
-        }
-
-        .faq-item.active .faq-icon {
-            transform: rotate(180deg);
-        }
-
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .faq-item.active .faq-answer {
-            max-height: 500px;
-        }
-
-        .faq-answer-content {
-            padding: 0 1.5rem 1.25rem;
-            color: #718096;
-        }
-
-        /* 页脚 */
-        .footer {
-            background: #2d3748;
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: #a0aec0;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: #63b3ed;
-        }
-
-        .footer-text {
-            color: #718096;
-            font-size: 0.875rem;
-        }
-
-        /* 背景区块 */
-        .section-alt {
-            background: #fff;
-            border-top: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero-stats {
-                gap: 2rem;
-            }
-
-            .timeline {
-                padding-left: 30px;
-            }
-
-            .timeline::before {
-                left: 6px;
-            }
-
-            .timeline-item {
-                padding-left: 20px;
-            }
-
-            .timeline-item::before {
-                left: -24px;
-                width: 12px;
-                height: 12px;
-            }
-
-            .leaderboard-table {
-                font-size: 0.875rem;
-            }
-
-            .leaderboard-table th,
-            .leaderboard-table td {
-                padding: 0.75rem 0.5rem;
-            }
-
-            .section {
-                padding: 3rem 0;
-            }
-        }
-
-        /* 滚动平滑 */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* 加载动画 */
-        .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(49, 130, 206, 0.3);
-            border-top-color: #3182ce;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>算子生成比赛 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 基础平滑 & 导航点样式 (保持不变) */
+    html { scroll-behavior: smooth; }
+    .page-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 20px 40px;
+    }
+    .leaderboard-container {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .leaderboard-container::-webkit-scrollbar { width: 8px; }
+    .leaderboard-container::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
+    .leaderboard-container::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    .leaderboard-container::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #4b5563;
+      transition: all 0.3s;
+    }
+    .nav-dot.active {
+      background: #fbbf24;
+      transform: scale(1.2);
+    }
+    .nav-dot:hover { background: #9ca3af; }
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .faq-content.open { max-height: 200px; }
+
+    /* ----- 白色主题 (追加class = white-theme) ----- */
+    body.white-theme {
+      background-color: #f9fafb !important;
+      color: #111827 !important;
+    }
+    /* 导航背景 & 边框 */
+    body.white-theme nav {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      border-bottom-color: #e5e7eb !important;
+    }
+    body.white-theme nav .text-yellow-400 { color: #b45309 !important; }  /* 加深 amber 更可见 */
+    body.white-theme nav a { color: #374151 !important; }
+    body.white-theme nav a:hover { color: #b45309 !important; }
+
+    /* 右侧导航点 —— 白底时变灰 */
+    body.white-theme .nav-dot { background: #9ca3af; }
+    body.white-theme .nav-dot.active { background: #f59e0b; }
+
+    /* 区块背景 (原本深色带灰/黑) 改为浅灰/白 */
+    body.white-theme .page-section { background: #ffffff !important; }
+    body.white-theme .bg-gray-900 { background-color: #ffffff !important; }
+    body.white-theme .bg-gray-800 { background-color: #f3f4f6 !important; }
+    body.white-theme .bg-gray-800\/50 { background-color: rgba(243, 244, 246, 0.7) !important; }
+    body.white-theme .bg-gray-700 { background-color: #e5e7eb !important; }
+    body.white-theme .bg-gray-700\/50 { background-color: rgba(229, 231, 235, 0.5) !important; }
+    body.white-theme .border-gray-700 { border-color: #d1d5db !important; }
+    body.white-theme .border-gray-800 { border-color: #d1d5db !important; }
+    body.white-theme .border-yellow-500\/50 { border-color: #fbbf24 !important; }
+    body.white-theme .border-gray-400\/50 { border-color: #9ca3af !important; }
+    body.white-theme .border-orange-500\/50 { border-color: #fb923c !important; }
+
+    /* 文本颜色修正 */
+    body.white-theme .text-gray-300,
+    body.white-theme .text-gray-400 { color: #4b5563 !important; }
+    body.white-theme .text-gray-500 { color: #6b7280 !important; }
+    body.white-theme .text-yellow-400 { color: #b45309 !important; }  /* 提高对比度 */
+    body.white-theme .text-blue-400 { color: #2563eb !important; }
+    body.white-theme .text-blue-400:hover { color: #1d4ed8 !important; }
+
+    /* 卡片内部微调 */
+    body.white-theme .bg-gradient-to-b.from-gray-900 { background: #f9fafb !important; }
+    body.white-theme .from-yellow-500\/20 { background: #fef3c7 !important; } /* 简单处理梯度 */
+    body.white-theme .from-gray-400\/20 { background: #f3f4f6 !important; }
+    body.white-theme .from-orange-500\/20 { background: #ffedd5 !important; }
+
+    /* 输入框、按钮 */
+    body.white-theme input.bg-gray-800 {
+      background-color: #ffffff !important;
+      border-color: #d1d5db !important;
+      color: #111827 !important;
+    }
+    body.white-theme .bg-gray-700 { background-color: #e5e7eb !important; }
+    body.white-theme .bg-gray-700:hover { background-color: #d1d5db !important; }
+    body.white-theme button.bg-yellow-500 {
+      background-color: #f59e0b !important;
+      color: #ffffff;
+    }
+    body.white-theme button.bg-yellow-500:hover { background-color: #d97706 !important; }
+
+    /* 排行榜表头 */
+    body.white-theme .bg-gray-700\/50 { background-color: #e5e7eb !important; }
+    body.white-theme .leaderboard-container .border-gray-700 { border-color: #d1d5db !important; }
+
+    /* FAQ */
+    body.white-theme .faq-content .text-gray-400 { color: #4b5563 !important; }
+
+    /* 页脚 */
+    body.white-theme .border-gray-700 { border-color: #d1d5db !important; }
+
+    /* 切换按钮固定样式 (始终可见) */
+    .theme-toggle-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 100;
+      background: #1f2937;
+      color: #fbbf24;
+      border: 1px solid #4b5563;
+      border-radius: 40px;
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.5);
+      transition: all 0.2s;
+      backdrop-filter: blur(4px);
+    }
+    .theme-toggle-btn:hover {
+      background: #374151;
+      color: #fcd34d;
+    }
+    body.white-theme .theme-toggle-btn {
+      background: white;
+      color: #b45309;
+      border-color: #d1d5db;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    body.white-theme .theme-toggle-btn:hover {
+      background: #f3f4f6;
+    }
+  </style>
 </head>
-<body>
-    <!-- 导航栏 -->
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="nav-logo">⚡ Algorithm Contest</div>
-            <ul class="nav-links">
-                <li><a href="#home" class="active">首页</a></li>
-                <li><a href="#leaderboard">排行榜</a></li>
-                <li><a href="#timeline">赛程安排</a></li>
-                <li><a href="#prizes">奖项设置</a></li>
-                <li><a href="#rules">比赛规则</a></li>
-                <li><a href="#faq">FAQ</a></li>
-            </ul>
+<body class="bg-gray-900 text-white">
+
+  <!-- 固定切换按钮 (置于右下角, 不干扰布局) -->
+  <button class="theme-toggle-btn" id="themeSwitchBtn">🌓 切换白色风格</button>
+
+  <!-- 顶部导航 (深色默认) -->
+  <nav class="fixed top-0 left-0 right-0 bg-gray-900/95 backdrop-blur z-50 border-b border-gray-800">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="text-xl font-bold text-yellow-400">⚡ Algorithm Contest</div>
+      <div class="hidden md:flex gap-6 text-sm">
+        <a href="#home" class="hover:text-yellow-400 transition">首页</a>
+        <a href="#leaderboard" class="hover:text-yellow-400 transition">排行榜</a>
+        <a href="#schedule" class="hover:text-yellow-400 transition">赛程安排</a>
+        <a href="#prizes" class="hover:text-yellow-400 transition">奖项设置</a>
+        <a href="#rules" class="hover:text-yellow-400 transition">比赛规则</a>
+        <a href="#faq" class="hover:text-yellow-400 transition">FAQ</a>
+        <a href="#contact" class="hover:text-yellow-400 transition">联系我们</a>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- 右侧导航点 -->
+  <div class="fixed right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3" id="navDots">
+    <a href="#home" class="nav-dot active" title="首页"></a>
+    <a href="#leaderboard" class="nav-dot" title="排行榜"></a>
+    <a href="#schedule" class="nav-dot" title="赛程安排"></a>
+    <a href="#prizes" class="nav-dot" title="奖项设置"></a>
+    <a href="#rules" class="nav-dot" title="比赛规则"></a>
+    <a href="#faq" class="nav-dot" title="FAQ"></a>
+    <a href="#contact" class="nav-dot" title="联系我们"></a>
+  </div>
+
+  <!-- 第1页：首页 (深色结构完全保留) -->
+  <section id="home" class="page-section bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-5xl md:text-6xl font-bold mb-6">
+        ⚡ 算子生成比赛 <span class="text-yellow-400">2026</span>
+      </h1>
+      <p class="text-xl text-gray-300 mb-12">
+        挑战极限，突破自我。在这里，用代码证明你的实力，与顶尖选手同台竞技。
+      </p>
+      
+      <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+          <div class="text-4xl font-bold text-yellow-400 mb-2" id="participantCount">--</div>
+          <div class="text-gray-400">参赛选手</div>
         </div>
-    </nav>
-
-    <!-- Hero 区域 -->
-    <section class="hero" id="home">
-        <h1>⚡ 算子生成比赛 2026</h1>
-        <p>挑战极限，突破自我。在这里，用代码证明你的实力，与顶尖选手同台竞技。</p>
-        <div class="hero-stats">
-            <div class="stat-item">
-                <div class="stat-value" id="participant-count">--</div>
-                <div class="stat-label">参赛选手</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="submission-count">--</div>
-                <div class="stat-label">提交次数</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">¥50,000</div>
-                <div class="stat-label">奖金池</div>
-            </div>
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+          <div class="text-4xl font-bold text-yellow-400 mb-2" id="submissionCount">--</div>
+          <div class="text-gray-400">提交次数</div>
         </div>
-    </section>
-
-    <!-- 排行榜 -->
-    <section class="leaderboard-section" id="leaderboard">
-        <div class="container">
-            <div class="leaderboard-header">
-                <h2 class="section-title" style="margin-bottom: 0;">🏆 <span>实时排行榜</span></h2>
-                <button class="refresh-btn" onclick="refreshLeaderboard()">
-                    <span>🔄</span> 刷新数据
-                </button>
-            </div>
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>排名</th>
-                        <th>选手</th>
-                        <th>分数</th>
-                        <th>提交时间</th>
-                        <th>Commit</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 2rem; color: #718096;">
-                            数据加载中...
-                        </td>
-                    </tr>
-                </tbody>                
-            </table>
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+          <div class="text-4xl font-bold text-yellow-400 mb-2">¥50,000</div>
+          <div class="text-gray-400">奖金池</div>
         </div>
-    </section>
+      </div>
+      
+      <div class="mt-12">
+        <a href="#leaderboard" class="inline-block bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-8 rounded-lg transition">
+          查看排行榜 ↓
+        </a>
+      </div>
+    </div>
+  </section>
 
-    <!-- 时间线 -->
-    <section class="section section-alt" id="timeline">
-        <div class="container">
-            <h2 class="section-title">📅 <span>赛程安排</span></h2>
-            <div class="timeline">
-                <div class="timeline-item completed">
-                    <div class="timeline-content">
-                        <div class="timeline-date">2026.03.02 - 2026.03.08</div>
-                        <div class="timeline-title">报名阶段</div>
-                        <div class="timeline-desc">开放报名通道，完成实名认证和团队组建</div>
-                        <span class="timeline-status status-completed">✓ 已结束</span>
-                    </div>
-                </div>
-                <div class="timeline-item active">
-                    <div class="timeline-content">
-                        <div class="timeline-date">2025.02.20 - 2025.03.20</div>
-                        <div class="timeline-title">初赛阶段</div>
-                        <div class="timeline-desc">线上提交代码，系统自动评测，实时更新排行榜</div>
-                        <span class="timeline-status status-active">● 进行中</span>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-date">2025.03.25</div>
-                        <div class="timeline-title">初赛结果公布</div>
-                        <div class="timeline-desc">公布晋级名单，前50名进入复赛</div>
-                        <span class="timeline-status status-upcoming">○ 即将开始</span>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-date">2025.04.01 - 2025.04.15</div>
-                        <div class="timeline-title">复赛阶段</div>
-                        <div class="timeline-desc">更高难度题目，限时完成，代码审核</div>
-                        <span class="timeline-status status-upcoming">○ 即将开始</span>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-date">2025.04.25</div>
-                        <div class="timeline-title">总决赛 & 颁奖典礼</div>
-                        <div class="timeline-desc">线下答辩，专家评审，现场颁奖</div>
-                        <span class="timeline-status status-upcoming">○ 即将开始</span>
-                    </div>
-                </div>
-            </div>
+  <!-- 第2页：排行榜 (数据区域) -->
+  <section id="leaderboard" class="page-section bg-gray-900">
+    <div class="max-w-4xl mx-auto w-full">
+      <div class="text-center mb-8">
+        <h2 class="text-4xl font-bold mb-4">🏆 实时排行榜</h2>
+        <!-- 搜索框 -->
+        <div class="flex justify-center items-center gap-4 mt-4 mb-4">
+          <div class="relative">
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="搜索 GitHub 用户名..." 
+              class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 pl-10 w-64 focus:outline-none focus:border-yellow-400 transition"
+              onkeyup="handleSearch(event)"
+            >
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+          </div>
+          <button onclick="searchLeaderboard()" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg font-semibold transition">
+            搜索
+          </button>
+          <button onclick="clearSearch()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition">
+            清除
+          </button>
         </div>
-    </section>
-
-    <!-- 奖项设置 -->
-    <section class="section" id="prizes">
-        <div class="container">
-            <h2 class="section-title">🏆 <span>奖项设置</span></h2>
-            <div class="prizes-grid">
-                <div class="prize-card gold">
-                    <div class="prize-icon">🥇</div>
-                    <div class="prize-rank">冠军</div>
-                    <div class="prize-amount">¥20,000</div>
-                    <ul class="prize-benefits">
-                        <li>冠军证书</li>
-                        <li>冠军专属纪念礼品</li>
-                    </ul>
-                </div>
-                <div class="prize-card silver">
-                    <div class="prize-icon">🥈</div>
-                    <div class="prize-rank">亚军</div>
-                    <div class="prize-amount">¥15,000</div>
-                    <ul class="prize-benefits">
-                        <li>亚军证书</li>
-                        <li>亚军纪念礼品</li>
-                    </ul>
-                </div>
-                <div class="prize-card bronze">
-                    <div class="prize-icon">🥉</div>
-                    <div class="prize-rank">季军</div>
-                    <div class="prize-amount">¥10,000</div>
-                    <ul class="prize-benefits">
-                        <li>季军证书</li>
-                        <li>季军纪念礼品</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="prizes-grid" style="margin-top: 2rem;">
-                <div class="prize-card">
-                    <div class="prize-icon">⭐</div>
-                    <div class="prize-rank">优秀奖 (4-10名)</div>
-                    <div class="prize-amount" style="color: #3182ce;">¥1,000</div>
-                    <ul class="prize-benefits">
-                        <li>优秀奖证书</li>
-                        <li>精美周边礼包</li>
-                    </ul>
-                </div>
-                <div class="prize-card">
-                    <div class="prize-icon">🎯</div>
-                    <div class="prize-rank">参与奖</div>
-                    <div class="prize-amount" style="color: #3182ce;">参与证书</div>
-                    <ul class="prize-benefits">
-                        <li>电子参赛证书</li>
-                    </ul>
-                </div>
-            </div>
+        <button onclick="loadLeaderboard()" class="text-yellow-400 hover:text-yellow-300 transition">
+          🔄 刷新数据
+        </button>
+      </div>
+      
+      <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+        <!-- 表头 -->
+        <div class="grid grid-cols-12 gap-4 p-4 bg-gray-700/50 font-semibold text-sm">
+          <div class="col-span-2 text-center">排名</div>
+          <div class="col-span-4">选手</div>
+          <div class="col-span-2 text-center">分数</div>
+          <div class="col-span-2 text-center">提交时间</div>
+          <div class="col-span-2 text-center">Commit</div>
         </div>
-    </section>
-
-    <!-- 比赛规则 -->
-    <section class="section section-alt" id="rules">
-        <div class="container">
-            <h2 class="section-title">📋 <span>比赛规则</span></h2>
-            <div class="rules-grid">
-                <div class="rule-card">
-                    <h3>📝 参赛要求</h3>
-                    <ul>
-                        <li>参赛者需完成实名认证</li>
-                        <li>支持个人或团队参赛（团队最多3人）</li>
-                        <li>每位选手只能参加一支队伍</li>
-                        <li>参赛者需同意并遵守比赛规则</li>
-                    </ul>
-                </div>
-                <div class="rule-card">
-                    <h3>💻 提交规范</h3>
-                    <ul>
-                        <li>代码需通过 Git 提交到指定仓库</li>
-                        <li>每天最多提交 10 次</li>
-                        <li>提交后系统自动评测，实时更新分数</li>
-                        <li>以最高分数作为最终成绩</li>
-                    </ul>
-                </div>
-                <div class="rule-card">
-                    <h3>⚖️ 评分标准</h3>
-                    <ul>
-                        <li>正确性 (60%): 测试用例通过率</li>
-                        <li>性能 (30%): 运行时间和内存占用</li>
-                        <li>代码质量 (10%): 可读性和规范性</li>
-                        <li>同分情况按提交时间排序</li>
-                    </ul>
-                </div>
-                <div class="rule-card">
-                    <h3>🚫 禁止行为</h3>
-                    <ul>
-                        <li>禁止抄袭他人代码或使用非法手段</li>
-                        <li>禁止恶意攻击评测系统</li>
-                        <li>禁止多账号参赛</li>
-                        <li>违规者将取消参赛资格</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-
-
-    <!-- FAQ -->
-    <section class="section" id="faq">
-        <div class="container">
-            <h2 class="section-title">❓ <span>常见问题</span></h2>
-            <div class="faq-list">
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>如何报名参赛？</span>
-                        <span class="faq-icon">▼</span>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            点击页面顶部的"立即报名"按钮，完成账号注册和实名认证后即可参赛。团队参赛需由队长创建团队并邀请队员加入。
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>支持哪些编程语言？</span>
-                        <span class="faq-icon">▼</span>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            目前支持 C/C++、Python、Java、Go、Rust 等主流编程语言。具体支持的语言版本请参考题目说明。
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>如何提交代码？</span>
-                        <span class="faq-icon">▼</span>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            代码需要通过 Git 提交到我们提供的代码仓库。每次 push 后系统会自动触发评测，评测结果会在几分钟内更新到排行榜。
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>评测系统的运行环境是什么？</span>
-                        <span class="faq-icon">▼</span>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            评测系统运行在 Linux 环境下，配置为 8核 CPU、32GB 内存。时间限制和内存限制会在每道题目中具体说明。
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>如何联系组委会？</span>
-                        <span class="faq-icon">▼</span>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            可以通过邮件 contest@example.com 联系我们，或在官方 Discord 频道提问。工作日 24 小时内会回复。
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 页脚 -->
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="#">关于我们</a>
-            <a href="#">使用条款</a>
-            <a href="#">隐私政策</a>
-            <a href="#">联系我们</a>
-            <a href="#">GitHub</a>
-            <a href="#">Discord</a>
-        </div>
-        <p class="footer-text">Powered by Express | © 2025 Algorithm Contest. All rights reserved.</p>
-    </footer>
-
-    <script>
-        const API_BASE_URL = 'https://api.mybigproject.xyz';
-    
-        // FAQ 折叠功能
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const item = question.parentElement;
-                item.classList.toggle('active');
-            });
-        });
-    
-        // 导航栏滚动高亮
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-links a');
-    
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (scrollY >= sectionTop - 100) {
-                    current = section.getAttribute('id');
-                }
-            });
-    
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === '#' + current) {
-                    link.classList.add('active');
-                }
-            });
-        });
-    
-        async function refreshLeaderboard() {
-            const tbody = document.getElementById('leaderboard-body');
-            const btn = document.querySelector('.refresh-btn');
-            
-            if (btn) {
-                btn.innerHTML = '<span class="loading-spinner"></span> 加载中...';
-                btn.disabled = true;
-            }
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #718096;">数据加载中...</td></tr>';
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
-                const result = await response.json();
-                
-                const data = result.data || result.entries || result;
-                renderLeaderboard(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error('获取排行榜失败:', error);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #e53e3e;">加载失败，请点击刷新重试</td></tr>';
-            } finally {
-                if (btn) {
-                    btn.innerHTML = '<span>🔄</span> 刷新数据';
-                    btn.disabled = false;
-                }
-            }
-        }
-    
-        function renderLeaderboard(data) {
-            const tbody = document.getElementById('leaderboard-body');
-            
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #718096;">暂无排行数据</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = data.map((player, index) => {
-                const rank = player.rank || index + 1;
-                const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
-                const name = player.github || player.name || '未知';
-                const initial = name.charAt(0).toUpperCase();
-                
-                return `
-                    <tr>
-                        <td><div class="rank-badge ${rankClass}">${rank}</div></td>
-                        <td>
-                            <div class="player-info">
-                                <div class="player-avatar">${initial}</div>
-                                <span class="player-name">${name}</span>
-                            </div>
-                        </td>
-                        <td><span class="score-value">${(player.score || 0).toFixed(2)}</span></td>
-                        <td><span class="time-value">${player.submitTime || '-'}</span></td>
-                        <td><a href="https://github.com/${name}" class="commit-link" target="_blank">${player.commitHash || '-'}</a></td>
-                    </tr>
-                `;
-            }).join('');
-        }
         
-        async function loadStats() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/stats`);
-                const result = await response.json();
-                
-                if (result.success && result.data) {
-                    const participantEl = document.getElementById('participant-count');
-                    const submissionEl = document.getElementById('submission-count');
-                    
-                    if (participantEl) {
-                        animateValue(participantEl, 0, result.data.participantCount, 300);
-                    }
-                    if (submissionEl) {
-                        animateValue(submissionEl, 0, result.data.submissionCount, 300);
-                    }
-                }
-            } catch (error) {
-                console.error('获取统计数据失败:', error);
-            }
+        <div class="leaderboard-container" id="leaderboardBody">
+          <div class="p-8 text-center text-gray-400">数据加载中...</div>
+        </div>
+      </div>
+      
+      <!-- 分页 -->
+      <div class="flex justify-center items-center gap-4 mt-6" id="pagination">
+        <button onclick="changePage(-1)" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition" id="prevBtn">← 上一页</button>
+        <span class="text-gray-400" id="pageInfo">第 1 页</span>
+        <button onclick="changePage(1)" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition" id="nextBtn">下一页 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第3页：赛程安排 -->
+  <section id="schedule" class="page-section bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <div class="max-w-3xl mx-auto w-full">  <!-- 内容与原来完全相同，省略内部细节以节省篇幅，但保证完整结构 -->
+      <h2 class="text-4xl font-bold text-center mb-12">📅 赛程安排</h2>
+      <div class="space-y-6">
+        <div class="flex gap-4 items-start"><div class="w-4 h-4 rounded-full bg-green-500 mt-2 flex-shrink-0"></div><div class="flex-1 bg-gray-800/50 rounded-xl p-6 border border-gray-700"><div class="text-yellow-400 text-sm mb-1">2026.03.02 - 2026.03.08</div><h3 class="text-xl font-bold mb-2">报名阶段</h3><p class="text-gray-400">开放报名通道，完成实名认证和团队组建</p><span class="inline-block mt-2 text-green-400 text-sm">✓ 已结束</span></div></div>
+        <div class="flex gap-4 items-start"><div class="w-4 h-4 rounded-full bg-yellow-500 mt-2 flex-shrink-0 animate-pulse"></div><div class="flex-1 bg-gray-800/50 rounded-xl p-6 border border-yellow-500/50"><div class="text-yellow-400 text-sm mb-1">2026.02.20 - 2026.03.20</div><h3 class="text-xl font-bold mb-2">初赛阶段</h3><p class="text-gray-400">线上提交代码，系统自动评测，实时更新排行榜</p><span class="inline-block mt-2 text-yellow-400 text-sm">● 进行中</span></div></div>
+        <div class="flex gap-4 items-start"><div class="w-4 h-4 rounded-full bg-gray-500 mt-2 flex-shrink-0"></div><div class="flex-1 bg-gray-800/50 rounded-xl p-6 border border-gray-700"><div class="text-yellow-400 text-sm mb-1">2026.03.25</div><h3 class="text-xl font-bold mb-2">初赛结果公布</h3><p class="text-gray-400">公布晋级名单，前50名进入复赛</p><span class="inline-block mt-2 text-gray-400 text-sm">○ 即将开始</span></div></div>
+        <div class="flex gap-4 items-start"><div class="w-4 h-4 rounded-full bg-gray-500 mt-2 flex-shrink-0"></div><div class="flex-1 bg-gray-800/50 rounded-xl p-6 border border-gray-700"><div class="text-yellow-400 text-sm mb-1">2026.04.01 - 2026.04.15</div><h3 class="text-xl font-bold mb-2">复赛阶段</h3><p class="text-gray-400">更高难度题目，限时完成，代码审核</p><span class="inline-block mt-2 text-gray-400 text-sm">○ 即将开始</span></div></div>
+        <div class="flex gap-4 items-start"><div class="w-4 h-4 rounded-full bg-gray-500 mt-2 flex-shrink-0"></div><div class="flex-1 bg-gray-800/50 rounded-xl p-6 border border-gray-700"><div class="text-yellow-400 text-sm mb-1">2026.04.25</div><h3 class="text-xl font-bold mb-2">总决赛 & 颁奖典礼</h3><p class="text-gray-400">线下答辩，专家评审，现场颁奖</p><span class="inline-block mt-2 text-gray-400 text-sm">○ 即将开始</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第4页：奖项设置 -->
+  <section id="prizes" class="page-section bg-gray-900">
+    <div class="max-w-4xl mx-auto w-full">
+      <h2 class="text-4xl font-bold text-center mb-12">🏆 奖项设置</h2>
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-b from-yellow-500/20 to-gray-800 rounded-xl p-8 border border-yellow-500/50 text-center"><div class="text-5xl mb-4">🥇</div><h3 class="text-2xl font-bold mb-2">冠军</h3><div class="text-3xl font-bold text-yellow-400 mb-4">¥20,000</div><ul class="text-gray-400 text-sm space-y-1"><li>冠军证书</li><li>冠军专属纪念礼品</li></ul></div>
+        <div class="bg-gradient-to-b from-gray-400/20 to-gray-800 rounded-xl p-8 border border-gray-400/50 text-center"><div class="text-5xl mb-4">🥈</div><h3 class="text-2xl font-bold mb-2">亚军</h3><div class="text-3xl font-bold text-gray-300 mb-4">¥15,000</div><ul class="text-gray-400 text-sm space-y-1"><li>亚军证书</li><li>亚军纪念礼品</li></ul></div>
+        <div class="bg-gradient-to-b from-orange-500/20 to-gray-800 rounded-xl p-8 border border-orange-500/50 text-center"><div class="text-5xl mb-4">🥉</div><h3 class="text-2xl font-bold mb-2">季军</h3><div class="text-3xl font-bold text-orange-400 mb-4">¥10,000</div><ul class="text-gray-400 text-sm space-y-1"><li>季军证书</li><li>季军纪念礼品</li></ul></div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700 text-center"><div class="text-3xl mb-2">⭐</div><h3 class="text-xl font-bold mb-2">优秀奖 (4-10名)</h3><div class="text-xl font-bold text-yellow-400 mb-2">¥1,000</div><p class="text-gray-400 text-sm">优秀奖证书 + 精美周边礼包</p></div>
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700 text-center"><div class="text-3xl mb-2">🎯</div><h3 class="text-xl font-bold mb-2">参与奖</h3><div class="text-xl font-bold text-gray-400 mb-2">参与证书</div><p class="text-gray-400 text-sm">电子参赛证书</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第5页：比赛规则 -->
+  <section id="rules" class="page-section bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <div class="max-w-4xl mx-auto w-full">
+      <h2 class="text-4xl font-bold text-center mb-12">📋 比赛规则</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700"><h3 class="text-xl font-bold mb-4 text-yellow-400">📝 参赛要求</h3><ul class="space-y-2 text-gray-300"><li>• 参赛者需完成实名认证</li><li>• 支持个人或团队参赛（团队最多3人）</li><li>• 每位选手只能参加一支队伍</li><li>• 参赛者需同意并遵守比赛规则</li></ul></div>
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700"><h3 class="text-xl font-bold mb-4 text-yellow-400">💻 提交规范</h3><ul class="space-y-2 text-gray-300"><li>• 代码需通过 Git 提交到指定仓库</li><li>• 每天最多提交 10 次</li><li>• 提交后系统自动评测，实时更新分数</li><li>• 以最高分数作为最终成绩</li></ul></div>
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700"><h3 class="text-xl font-bold mb-4 text-yellow-400">⚖️ 评分标准</h3><ul class="space-y-2 text-gray-300"><li>• 正确性 (60%): 测试用例通过率</li><li>• 性能 (30%): 运行时间和内存占用</li><li>• 代码质量 (10%): 可读性和规范性</li><li>• 同分情况按提交时间排序</li></ul></div>
+        <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700"><h3 class="text-xl font-bold mb-4 text-red-400">🚫 禁止行为</h3><ul class="space-y-2 text-gray-300"><li>• 禁止抄袭他人代码或使用非法手段</li><li>• 禁止恶意攻击评测系统</li><li>• 禁止多账号参赛</li><li>• 违规者将取消参赛资格</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第6页：FAQ -->
+  <section id="faq" class="page-section bg-gray-900">
+    <div class="max-w-3xl mx-auto w-full">
+      <h2 class="text-4xl font-bold text-center mb-12">❓ 常见问题</h2>
+      <div class="space-y-4">
+        <div class="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden"><button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-700/50 transition" onclick="toggleFaq(this)"><span class="font-semibold">如何提交代码？</span><span class="text-yellow-400">▼</span></button><div class="faq-content px-6 pb-6"><p class="text-gray-400">参赛选手需要创建私有github仓库，将机器人帐号@kernerl-competition-bot作为合作者加入仓库并按照指南配置仓库的webhook。配置完成后，选手每次 push 会自动触发评测。评测结果由自动更新至排行榜和提交记录评论区</p></div></div>
+        <div class="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden"><button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-700/50 transition" onclick="toggleFaq(this)"><span class="font-semibold">评测系统的运行环境是什么？</span><span class="text-yellow-400">▼</span></button><div class="faq-content px-6 pb-6"><p class="text-gray-400">评测系统运行在 Linux 环境下，配置为 MLU370（具体型号待备注，设备详细信息查询寒武纪官网），每道题目的时间限制为1分钟。</p></div></div>
+        <div class="bg-gray-800/50 rounded-xl border border-gray-700 overflow-hidden"><button class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-700/50 transition" onclick="toggleFaq(this)"><span class="font-semibold">如何联系组委会？</span><span class="text-yellow-400">▼</span></button><div class="faq-content px-6 pb-6"><p class="text-gray-400">可以通过邮件联系我们，详见联系我们页面。工作日 24 小时内会回复。</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 第7页：联系我们 -->
+  <section id="contact" class="page-section bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <div class="max-w-2xl mx-auto w-full text-center">
+      <h2 class="text-4xl font-bold mb-12">📬 联系我们</h2>
+      <div class="bg-gray-800/50 rounded-xl p-8 border border-gray-700 mb-8">
+        <h3 class="text-xl font-bold mb-6 text-yellow-400">联系邮箱</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-center gap-3"><span class="text-2xl">📧</span><a href="mailto:doubh25@mail.ustc.edu.cn" class="text-lg text-blue-400 hover:text-blue-300 transition">doubh25@mail.ustc.edu.cn</a></div>
+          <div class="flex items-center justify-center gap-3"><span class="text-2xl">📧</span><a href="mailto:huangdi@ict.ac.cn" class="text-lg text-blue-400 hover:text-blue-300 transition">huangdi@ict.ac.cn</a></div>
+        </div>
+      </div>
+      <p class="text-gray-400">如有任何问题，欢迎通过邮件联系我们。<br>工作日 24 小时内会回复。</p>
+      <div class="mt-12 pt-8 border-t border-gray-700 text-gray-500 text-sm">Powered by Express | © 2026 Algorithm Contest. All rights reserved.</div>
+    </div>
+  </section>
+
+  <script>
+    // ---------- 原封不动的逻辑 (API 调用、分页、搜索、FAQ) ----------
+    const API_BASE_URL = 'https://api.mybigproject.xyz';
+    let currentPage = 1;
+    const pageSize = 10;
+    let allEntries = [];
+    let filteredEntries = [];
+    let searchKeyword = '';
+
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/stats`);
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('participantCount').textContent = data.data.participantCount || 0;
+          document.getElementById('submissionCount').textContent = data.data.submissionCount || 0;
         }
+      } catch (e) { console.error('加载统计数据失败:', e); }
+    }
     
-        function animateValue(element, start, end, duration) {
-            if (!element) return;
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const value = Math.floor(progress * (end - start) + start);
-                element.textContent = value.toLocaleString();
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
+    async function loadLeaderboard() {
+      const container = document.getElementById('leaderboardBody');
+      container.innerHTML = '<div class="p-8 text-center text-gray-400">加载中...</div>';
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/leaderboard`);
+        const data = await res.json();
+        if (data.success && data.data.length > 0) {
+          allEntries = data.data;
+          filteredEntries = allEntries;
+          currentPage = 1;
+          renderLeaderboard();
+        } else {
+          container.innerHTML = '<div class="p-8 text-center text-gray-400">暂无数据</div>';
+          document.getElementById('pagination').style.display = 'none';
         }
+      } catch (e) {
+        container.innerHTML = '<div class="p-8 text-center text-red-400">加载失败，请稍后重试</div>';
+        console.error('加载排行榜失败:', e);
+      }
+    }
+
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboardBody');
+      const dataToShow = searchKeyword ? filteredEntries : allEntries;
+      const totalPages = Math.ceil(dataToShow.length / pageSize);
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageEntries = dataToShow.slice(start, end);
+      let html = '';
+      pageEntries.forEach((entry, index) => {
+        const rank = searchKeyword ? allEntries.findIndex(e => e.github === entry.github) + 1 : start + index + 1;
+        let rankClass = '', rankIcon = rank;
+        if (rank === 1) { rankClass = 'text-yellow-400'; rankIcon = '🥇'; }
+        else if (rank === 2) { rankClass = 'text-gray-300'; rankIcon = '🥈'; }
+        else if (rank === 3) { rankClass = 'text-orange-400'; rankIcon = '🥉'; }
+        const submitTime = entry.submitTime ? new Date(entry.submitTime).toLocaleDateString('zh-CN') : '-';
+        const githubUrl = `https://github.com/${entry.github}`;
+        html += `<div class="grid grid-cols-12 gap-4 p-4 border-b border-gray-700 hover:bg-gray-700/30 transition"><div class="col-span-2 text-center ${rankClass} font-bold">${rankIcon}</div><div class="col-span-4"><a href="${githubUrl}" target="_blank" class="text-blue-400 hover:text-blue-300 hover:underline transition">${entry.github}</a></div><div class="col-span-2 text-center font-mono text-yellow-400">${entry.score}</div><div class="col-span-2 text-center text-gray-400 text-sm">${submitTime}</div><div class="col-span-2 text-center font-mono text-gray-500 text-sm">${entry.commitHash || '-'}</div></div>`;
+      });
+      container.innerHTML = html;
+      document.getElementById('pageInfo').textContent = `第 ${currentPage} / ${totalPages} 页`;
+      document.getElementById('prevBtn').disabled = currentPage === 1;
+      document.getElementById('nextBtn').disabled = currentPage === totalPages;
+      document.getElementById('prevBtn').classList.toggle('opacity-50', currentPage === 1);
+      document.getElementById('nextBtn').classList.toggle('opacity-50', currentPage === totalPages);
+      if (totalPages <= 1) document.getElementById('pagination').style.display = 'none';
+      else document.getElementById('pagination').style.display = 'flex';
+    }
+
+    function changePage(delta) {
+      const totalPages = Math.ceil((searchKeyword ? filteredEntries : allEntries).length / pageSize);
+      const newPage = currentPage + delta;
+      if (newPage >= 1 && newPage <= totalPages) { currentPage = newPage; renderLeaderboard(); document.getElementById('leaderboardBody').scrollTop = 0; }
+    }
+
+    function searchLeaderboard() {
+      const input = document.getElementById('searchInput');
+      searchKeyword = input.value.trim().toLowerCase();
+      filteredEntries = searchKeyword ? allEntries.filter(entry => entry.github.toLowerCase().includes(searchKeyword)) : allEntries;
+      currentPage = 1;
+      renderLeaderboard();
+      if (filteredEntries.length === 0) document.getElementById('leaderboardBody').innerHTML = `<div class="p-8 text-center text-gray-400">未找到用户 "${searchKeyword}"</div>`;
+    }
+    function handleSearch(event) { if (event.key === 'Enter') searchLeaderboard(); }
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      searchKeyword = '';
+      filteredEntries = allEntries;
+      currentPage = 1;
+      renderLeaderboard();
+    }
+
+    function toggleFaq(btn) {
+      const content = btn.nextElementSibling;
+      const arrow = btn.querySelector('span:last-child');
+      content.classList.toggle('open');
+      arrow.textContent = content.classList.contains('open') ? '▲' : '▼';
+    }
+
+    function updateNavDots() {
+      const sections = document.querySelectorAll('.page-section');
+      const dots = document.querySelectorAll('.nav-dot');
+      let currentSection = 0;
+      sections.forEach((section, index) => { if (section.getBoundingClientRect().top <= window.innerHeight / 2) currentSection = index; });
+      dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSection));
+    }
+    window.addEventListener('scroll', updateNavDots);
     
-        window.addEventListener('load', () => {
-            loadStats();
-            refreshLeaderboard();
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      loadLeaderboard();
+      updateNavDots();
+    });
+
+    // ------- 主题切换按钮 -------
+    const themeBtn = document.getElementById('themeSwitchBtn');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('white-theme');
+      // 改变按钮文字
+      if (document.body.classList.contains('white-theme')) {
+        themeBtn.textContent = '🌙 切换深色风格';
+      } else {
+        themeBtn.textContent = '🌓 切换白色风格';
+      }
+    });
+  </script>
 </body>
 </html>

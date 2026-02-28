@@ -15,15 +15,22 @@
       "rank": 2
     },
     {
+      "github": "dog",
+      "score": 91.1,
+      "submitTime": "2026-02-28T11:56:42.251Z",
+      "commitHash": "ghi9342",
+      "rank": 3
+    },
+    {
       "github": "bob",
       "score": 88.3,
       "submitTime": "2026-02-28T11:49:24.747Z",
       "commitHash": "def5678",
-      "rank": 3
+      "rank": 4
     }
   ],
   "stats": {
-    "participantCount": 3,
-    "submissionCount": 3
+    "participantCount": 4,
+    "submissionCount": 4
   }
 }
